@@ -1,0 +1,33 @@
+yum groupinstall "Development tools"
+yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+
+open /etc/ld.so.conf
+edit: 
+include ld.so.conf.d/*.conf
+/usr/local/lib
+
+
+wget http://python.org/ftp/python/3.3.5/Python-3.3.5.tar.xz
+tar xf Python-3.3.5.tar.xz
+cd Python-3.3.5
+./configure --prefix=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+make && make altinstall
+
+wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+
+
+# First get the setup script for Setuptools:
+wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+
+# Then install it for Python 2.7 and/or Python 3.3:
+python2.7 ez_setup.py
+python3.3 ez_setup.py
+
+# Now install pip using the newly installed setuptools:
+easy_install-2.7 pip
+easy_install-3.3 pip
+
+# With pip installed you can now do things like this:
+pip2.7 install [packagename]
+pip2.7 install --upgrade [packagename]
+pip2.7 uninstall [packagename]
