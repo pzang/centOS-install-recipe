@@ -1,0 +1,261 @@
+Deciding to use a managed NoSQL datastore is a great step in ensuring you run a fast, scalable and
+resilient application without needing to be an expert in highly available architecture. How
+do you know which technology is the best for your application? How do you know whether the
+  provider's performance claims are true? You are putting your application on someone else’s
+  infrastructure and that requires some hard answers about their claims.
+
+  To determine the suitability of a provider, your first port of call is to benchmark.
+  Choosing a service provider is often done in a number of stages. First is to shortlist
+  providers based on capabilities and claimed performance, ruling out those that do not meet
+  your application requirements. Second is to look for benchmarks conducted by third parties, if
+  any. The final stage is to benchmark the service yourself.
+
+  In this article we will show you how to run some preliminary benchmarks against two
+  managed NoSQL systems. For this test we will compare Instaclustr and Amazon DynamoDB using the
+  Yahoo Cloud Serving Benchmark (YCSB). Instaclustr provides managed Apache Cassandra hosting
+  and DynamoDB is Amazons own managed key value store solution.
+
+  Both Cassandra and DynamoDB are very similar architecturally and both Instaclustr and
+  DynamoDB services run on Amazon's cloud infrastructure, so it will be an excellent
+  performance test and comparison of the two.
+
+  Step 1 - Client Setup
+
+  YCSB is a cloud service testing client that performs reads, writes and updates according
+  to specified workloads. Running from the command line it can create an arbitrary number
+  of threads that will query the system under test. It will measure throughput in operations per
+  second and record the latency in performing these operations.
+
+  YCSB can run in parallel from multiple hosts. For this article we will deploy YCSB across 4
+  High-CPU Extra Large EC2 instances (c1.xlarge), however you can just as easily run this
+  from a single instance. Investigate EC2 spot pricing to reduce the cost of benchmarking.
+
+  Launch each instance with a Ubuntu based AMI. Make a note of the security group you assign
+  to the instances and the region you deployed them in. Once the instances have booted, SSH into
+  each instance (replacing ec2-XXX-XXX-XXX-XXX.compute-1.amazonaws.com with the DNS name of your
+  instance):
+
+  ssh –i /path/to/your/key.pem ubuntu@ec2-XXX-XXX-XXX-XXX.compute-1.amazonaws.com
+
+  Install the required dependencies using apt-get:
+
+  sudo apt-get update 
+  sudo apt-get -y install --fix-missing libjna-java htop sysstat iftop binutils pssh pbzip2
+  openssl maven2 ant liblzo2-dev ntp tree xfsprogs openjdk-6-jdk git
+
+  Clone the YCSB and Cassandra git repositories:
+
+  git clone https://github.com/apache/cassandra.git 
+  git clone https://github.com/brianfrankcooper/YCSB.git
+
+  Change to the Cassandra directory and build Cassandra:
+
+  cd Cassandra 
+  ant
+
+  Copy the Cassandra libraries to the YCSB directory:
+
+  mkdir ~/YCSB/Cassandra/lib 
+  cp ~/Cassandra/build/*.jar ~/YCSB/Cassandra/lib 
+  cp ~/Cassandra/lib/*.jar ~/YCSB/Cassandra/lib
+
+  Change to the YCSB directory:
+
+  cd ~/YCSB
+
+  Edit the pom.xml file. Under the modules tag, remove all the services you do not wish to test
+  (except core). For this example the modules portion of the pom.xml should look like this:
+
+  <modules>
+
+      <module>cassandra</module>
+
+          <module>core</module>
+
+              <module>dynamodb</module>
+
+              </modules>
+              Build YCSB:
+
+              mvn package
+
+              Step 2 - Service Setup
+
+              Sign up to Instaclustr and create a new cluster.
+
+              Select the region you wish to deploy to, ensuring that the region you choose is the
+              same region containing your test client instances (created in step 1). For this
+              test we will choose Instaclustr's professional tier as it roughly corresponds to the
+              same price as DynamoDB's highest capacity table you can request without needing to
+              ask Amazon to increase your account limits.
+
+              Instaclustr will ask you to select a SSH key to associate with the cluster (you
+              can also generate a new key from the cluster creation page). Accept the terms
+              and conditions and hit “Create Cluster”. This will cost around $8.88 an hour plus
+              transfer and S3 costs.
+
+              While Instaclustr deploys your Cassandra cluster we will create the DynamoDB table.
+
+              Log into your AWS console and go to the DynamoDB console page. Click “Create
+              Table”.
+
+              Set the Name for your DynamoDB table to be usertable and set the Primary Key Type
+              to Hash. Set the Hash Attribute Name to firstname. Click next and set the Read and
+              Write capacities to 10000. Click next until done, skipping the cloud watch
+              configuration page, to create the table. This will cost around $7.80 plus storage
+              and transfer costs per hour.
+
+              While you are in the AWS console, go to the EC2 console page. Click on security
+              groups and allow All TCP, All UDP and All IMCP packets between the test client
+              security group you selected in step 1 and your Instaclustr security group
+              (called instaclustr-yourname-yourclustername-group). You can do this by entering
+              the security group id into the source box when setting security group rules.
+
+              Your DynamoDB table will take a little while to create. While waiting let's go
+              back to the test clients and configure the tests.
+
+              Step 3 - Test Configuration
+
+              Edit the file ~/YCSB/dynamodb/conf/AWSCredentials.properties and set the AccessKey
+              and SecretKey properties to those of your account (remember to uncomment the
+              lines by deleting the #).
+
+              Edit ~/YCSB/dynamodb/conf/dynamodb.properties and set the path to the
+              AWSCredentials.properties file. If you created your test clients in a different
+              region to us-east1 change the DynamoDB endpoint to match and leave the rest of
+              the settings as is.
+
+              Your dynamodb properties file should contain something similar to the following:
+
+              dynamodb.awsCredentialsFile = dynamodb/conf/AWSCredentials.properties
+              dynamodb.primaryKey = firstname
+              dynamodb.endpoint = http://dynamodb.us-east-1.amazonaws.com
+              Go back to your Instaclustr dashboard and open OpsCenter for your cluster. Click
+              Data Modeling (in the left hand menu) and click Add Keyspace. Set the Name to
+              usertable and replicationfactor_ to 3. Untick I would like to create a Column
+              Family and click Save Keyspace. Go back to your Instaclustr dashboard and make
+              note of the public DNS names for the nodes in your Cassandra cluster.
+
+              On one of your test client instances run the following command, replacing
+              ec2-XXX-XXX-XXX-XXX.compute-1.amazonaws.com with the DNS name for one of your
+              Cassandra nodes:
+
+              ~/Cassandra/bin/Cassandra-cli –h ec2-XX-XX-XX-XX.compute-1.amazonaws.com
+
+              Run the following commands in the Cassandra CLI:
+
+              USE usertable;
+              CREATE COLUMN FAMILY data with column_type = 'Standard'
+                  and comparator = 'UTF8Type'
+                      and default_validation_class = 'UTF8Type'
+                          and key_validation_class = 'UTF8Type'
+                              and read_repair_chance = 0.1
+                                  and dclocal_read_repair_chance = 0.0
+                                      and caching = 'ALL';
+                                      QUIT;
+                                      On each of your test client instances, create a file in
+                                      the ~/YCSB directory called Cassandra.props containing
+                                      the following. For each separate test client set the
+                                      insertstart property to be 0, 2500000, 5000000 and
+                                      7500000 respectively. This means they will write
+                                      different portions of data to the cluster. Set the
+                                      hosts property to the DNS names of the Cassandra nodes
+                                      (replacing ec2-XX-XX-XX-XX.compute-1.amazonaws.com etc
+                                      with the DNS names of your Cassandra nodes).
+
+                                      recordcount=10000000
+                                      insertstart=0             # This should be different for
+                                      each client instance
+                                      insertcount=2500000
+                                      hosts=ec2-XX-XX-XX-XX.compute-1.amazonaws.com,ec2-YY-YY-YY-
+                                      YY.compute-1.amazonaws.com,
+                                      ec2-AA-AA-AA-AA.compute-1.amazonaws.com …
+                                      Create a file in the ~/YCSB directory called
+                                      dynamo.props and fill it with the same information as the
+                                      Cassandra.props file leaving the hosts setting out.
+                                      Again, for each separate test client set the insertstart
+                                      property to be 0, 2500000, 5000000 and 7500000
+                                      respectively. So it should look something like this:
+
+                                      recordcount=10000000
+                                      insertstart=0               # This should be different for
+                                      each client instance
+                                      insertcount=2500000
+                                      If you are using a single test client you can leave
+                                      insertstart and insertcount out of both files.
+
+                                      Step 4 - Running The Benchmark
+
+                                      Now for the fun bit, running the tests!
+
+                                      On each test client instance, from inside the ~/YCSB
+                                      directory, run:
+
+                                      ./bin/ycsb load cassandra-10 -P workloads/workloada -P
+                                      cassandra.props -threads 50 -s > loaddata-cassandra.results
+
+                                      This command tells YCSB to run the load component of
+                                      workload A (which inserts data that subsequent tests
+                                      rely on) using the cassandra-1.* client (load cassandra-10
+                                      -P workloads/workloada), it also tells YCSB to load our
+                                      configuration file (-P cassandra.props), use 50 client
+                                      threads (-threads 50) and output status updates to stderr
+                                      and test results to the loaddata-cassandra.results
+                                      file (-s > loaddata-cassandra.results).
+
+                                      This will load data into Instaclustr and test its write
+                                      throughput. YCSB will output status updates about the
+                                      test every 10 seconds during the test.
+
+                                      To load data into your DynamoDB table run: ./bin/ycsb
+                                      load dynamodb -P workloads/workloada -P dynamodb.props -P
+                                      dynamodb/conf/dynamodb.properties -threads 50 -s >
+                                      loaddata-dynamodb.results
+
+                                      Once the workload A data is loaded into both Instaclustr
+                                      and DynamoDB you can execute different YCSB workloads.
+                                      Different workloads will have different proportions of
+                                      read, write and update operations that they test. Each
+                                      workload is split into a load and run portion. The load
+                                      component will pre-fill the database with the required data
+                                      and the run component will perform the workload to be
+                                      measured. For example the run portion of workload A (which
+                                      we used to load some data) consists of a 50 / 50 split of
+                                      read and write operations. The load operation for
+                                      workload A is similar to that of the other tests and
+                                      hence the data generated from it can be reused.
+
+                                      To start workload A, run:
+
+                                      ./bin/ycsb run cassandra-10 -P workloads/workloada -P
+                                      cassandra.props -threads 50 -p
+                                      operationcount=10000000 -s > workloada-cassandra.results
+
+                                      and for DynamoDB, run:
+
+                                      ./bin/ycsb run dynamodb -P workloads/workloada -P
+                                      dynamodb.props -P dynamodb/conf/dynamodb.properties
+                                      -threads 50 -p operationcount=10000000 -s >
+                                      workloada-dynamodb.results
+
+                                      Other workloads have different usage patterns and may
+                                      be more appropriate for testing a particular
+                                      technology for your specific use case. You can also use
+                                      the load stage of Workload A as a measure of system write
+                                      performance.
+
+                                      At the end of each test, YCSB will output a summary of the
+                                      test. This will be found in the piped output results
+                                      files created in the YCSB directory
+                                      (workloada-cassandra.results, etc).
+
+                                      For more information on YCSB workloads and tests see the
+                                      core workloads page.
+
+                                      Step 5 - The Results
+
+                                      Evaluate the results against your application
+                                      throughput and latency requirements. Remember to sum
+                                      the average throughput of each YCSB client to get the
+                                      total average throughput. YCSB also reports the 95th
+                                      and 99th percentile latencies for each test.

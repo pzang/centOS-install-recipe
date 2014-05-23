@@ -1,0 +1,1899 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0105)http://highscalability.com/blog/2013/4/3/5-steps-to-benchmarking-managed-nosql-dynamodb-vs-cassandra.html -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" class="wf-loading"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   
+  
+   <meta name="Robots" content="index,follow">  
+  
+  
+  <!-- highscalability -->
+
+  <link rel="shortcut icon" href="http://highscalability.com/favicon.png" type="image/png">
+
+  <link id="primaryStylesheet" rel="stylesheet" type="text/css" href="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/common.css">
+  
+  <link id="slideShowStylesheet" rel="stylesheet" type="text/css" href="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/squarespace-gallery-slideshow.css">
+  
+  
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="http://feeds.feedburner.com/HighScalability">
+  
+  
+  <!-- Google Web Fonts -->
+  <script async="" type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/gpt.js"></script><script src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/webfont.js" type="text/javascript" async=""></script><script type="text/javascript">
+    	WebFontConfig = {};
+  
+   
+    (function() {
+      var wf = document.createElement('script');
+      wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+          '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+      wf.type = 'text/javascript';
+      wf.async = 'true';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(wf, s);
+    })();
+  </script>
+
+  <script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/connection_core-min.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/json-min.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/animation-min.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/selector.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/element.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/global.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/lightbox.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/api.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/base64.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/census.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/yui2-yui3-bridge.js"></script>
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/squarespace-gallery-slideshow.js"></script>
+
+
+  <script type="text/javascript">
+  // <![CDATA[
+
+    Squarespace.Constants.SS_AUTHKEY = encodeURIComponent("");
+    Squarespace.Constants.WEBSITE_TITLE =  "High Scalability"; 
+    
+     Squarespace.Constants.CURRENT_MODULE_ID = "4867632"; 
+    
+    
+    
+    Squarespace.Constants.ADMINISTRATION_UI =  false; 
+    
+    
+     Squarespace.Constants.OBJECT_PERMALINK = "http://highscalability.com/blog/2013/4/3/5-steps-to-benchmarking-managed-nosql-dynamodb-vs-cassandra.html"; 
+    Squarespace.Constants.CORE_APPLICATION_DOMAIN = "squarespace.com";
+    Squarespace.Constants.CORE_V6_APPLICATION_DOMAIN = "squarespace.com";
+    Squarespace.Constants.V5_FRONTSITE = "http://five.squarespace.com";
+    Squarespace.Constants.WEBSITE_ID = "426227";
+
+    
+
+    
+
+    
+
+  // ]]>
+  </script>
+
+      <title>5 Steps to Benchmarking Managed NoSQL - DynamoDB vs&nbsp;Cassandra - High Scalability - </title>
+    <meta property="og:title" content="5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability - "> 
+  
+
+      <meta property="og:description" content=" This is a guest post by Ben Bromhead from Instaclustr 
+
+ 
+
+ Deciding to use a managed NoSQL datast...">
+  
+
+  
+      <meta property="og:image" content="http://farm4.staticflickr.com/3329/3296379139_7b768490a9_m.jpg">
+  
+
+  <!-- End Heading -->
+
+  <script type="text/javascript">
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+(function() {
+var gads = document.createElement('script');
+gads.async = true;
+gads.type = 'text/javascript';
+var useSSL = 'https:' == document.location.protocol;
+gads.src = (useSSL ? 'https:' : 'http:') + 
+'//www.googletagservices.com/tag/js/gpt.js';
+var node = document.getElementsByTagName('script')[0];
+node.parentNode.insertBefore(gads, node);
+})();
+</script>
+
+<script type="text/javascript">
+googletag.cmd.push(function() {
+googletag.defineSlot('/1044643/SS_HS_Ad1', [125, 125], 'div-gpt-ad-1325175098795-0').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad10', [125, 125], 'div-gpt-ad-1325175098795-1').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad11', [125, 125], 'div-gpt-ad-1325175098795-2').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad12', [125, 125], 'div-gpt-ad-1325175098795-3').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad13', [125, 125], 'div-gpt-ad-1325175098795-4').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad14', [125, 125], 'div-gpt-ad-1325175098795-5').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad15', [125, 125], 'div-gpt-ad-1325175098795-6').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad16', [125, 125], 'div-gpt-ad-1325175098795-7').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad17', [125, 125], 'div-gpt-ad-1325175098795-8').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad2', [125, 125], 'div-gpt-ad-1325175098795-9').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad3', [125, 125], 'div-gpt-ad-1325175098795-10').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad4', [125, 125], 'div-gpt-ad-1325175098795-11').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad5', [125, 125], 'div-gpt-ad-1325175098795-12').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad6', [125, 125], 'div-gpt-ad-1325175098795-13').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_ad7', [125, 125], 'div-gpt-ad-1325175098795-14').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad8', [125, 125], 'div-gpt-ad-1325175098795-15').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad9', [125, 125], 'div-gpt-ad-1325175098795-16').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad18', [125, 125], 'div-gpt-ad-1325175098795-17').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad19', [125, 125], 'div-gpt-ad-1325175098795-18').addService(googletag.pubads());
+googletag.defineSlot('/1044643/SS_HS_Ad20', [125, 125], 'div-gpt-ad-1325175098795-19').addService(googletag.pubads());
+googletag.pubads().enableSingleRequest();
+googletag.enableServices();
+});
+</script>
+
+  <script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/cookie-min.js"></script><script async="" type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/pubads_impl_39.js"></script>
+  <script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/eu-cookie-policy.js"></script>
+
+<script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/osd.js"></script></head>
+
+<body id="modulePage4867632" class="objectId33181537" data-twttr-rendered="true">
+
+  <script type="text/javascript">
+  YAHOO.util.Event.onDOMReady(function() {
+    if (document.location.href.indexOf("SSLogoutOk=true") != -1) {
+      new Squarespace.FixedPositionTip("Logout Successful", "You have been successfully logged out.", { xMargin: 15, yMargin: 15, icon: "/universal/images/helptip-info.png", orientation: "upper-right", viewportFixed: true, autoHide: 1800 }).show();
+    }
+  });
+</script>
+
+    
+
+  <script type="text/javascript">
+    YAHOO.util.Event.onDOMReady(function() { new Squarespace.Census.hit(); } );
+  </script>
+
+  <script type="text/javascript">
+    YAHOO.util.Event.addListener(document, "keyup", function (e) { if (!e) { e = event; } if (e.keyCode == 27) { document.location.href = "/login/?returnUrl=%2Fblog%2F2013%2F4%2F3%2F5-steps-to-benchmarking-managed-nosql-dynamodb-vs-cassandra.html"; } });
+  </script>
+
+
+
+
+  
+
+  <div id="canvasWrapper"><div id="canvas">
+  
+  
+
+  <div id="pageHeaderWrapper"><div id="pageHeader">
+
+      <div id="navigationTop"><div id="navigationTop-sectionContent2191792" class="horizontalNavigationBar"><ul class="content-navigation">
+    
+  <li class="module active-module  " id="navigationTop-moduleContentWrapper4867632">
+
+    <div id="navigationTop-moduleContent4867632">
+
+              <a id="navigationTop-moduleLink4867632" class=" " href="http://highscalability.com/"><span>Home</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper4850438">
+
+    <div id="navigationTop-moduleContent4850438">
+
+              <a id="navigationTop-moduleLink4850438" class=" " href="http://highscalability.com/blog/category/example"><span>Real Life Architectures</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper10576114">
+
+    <div id="navigationTop-moduleContent10576114">
+
+              <a id="navigationTop-moduleLink10576114" class=" " href="http://highscalability.squarespace.com/blog/category/strategy"><span>Strategies</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper4847294">
+
+    <div id="navigationTop-moduleContent4847294">
+
+              <a id="navigationTop-moduleLink4847294" class=" " href="http://highscalability.com/all-posts/"><span>All Posts</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper4850431">
+
+    <div id="navigationTop-moduleContent4850431">
+
+              <a id="navigationTop-moduleLink4850431" class=" " href="http://highscalability.com/advertising/"><span>Advertising</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper5498762">
+
+    <div id="navigationTop-moduleContent5498762">
+
+              <a id="navigationTop-moduleLink5498762" class=" " href="http://astore.amazon.com/possiboutpos-20"><span>Book Store</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper4850400">
+
+    <div id="navigationTop-moduleContent4850400">
+
+              <a id="navigationTop-moduleLink4850400" class=" " href="http://highscalability.com/start-here/"><span>Start Here</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper4850388">
+
+    <div id="navigationTop-moduleContent4850388">
+
+              <a id="navigationTop-moduleLink4850388" class=" " href="http://highscalability.com/contact/"><span>contact</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper15178301">
+
+    <div id="navigationTop-moduleContent15178301">
+
+              <a id="navigationTop-moduleLink15178301" class=" " href="http://highscalability.com/all-time-favorites/"><span>All Time Favorites</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper5861345">
+
+    <div id="navigationTop-moduleContent5861345">
+
+              <a id="navigationTop-moduleLink5861345" class=" " href="http://feeds.feedburner.com/HighScalability"><span>RSS</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper18971493">
+
+    <div id="navigationTop-moduleContent18971493">
+
+              <a id="navigationTop-moduleLink18971493" class=" " href="https://twitter.com/highscal"><span>Twitter</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper18971509">
+
+    <div id="navigationTop-moduleContent18971509">
+
+              <a id="navigationTop-moduleLink18971509" class=" " href="http://www.facebook.com/pages/Highscalability/441249225918692"><span>Facebook</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationTop-moduleContentWrapper19028422">
+
+    <div id="navigationTop-moduleContent19028422">
+
+              <a id="navigationTop-moduleLink19028422" class=" " href="https://plus.google.com/b/116966782604206517628/116966782604206517628/posts"><span>G+</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  </ul><br class="clearer"></div></div>
+
+    
+        
+      
+  
+      <div id="bannerAreaWrapper"><div id="bannerArea">
+
+        
+        <div id="bannerWrapper">
+          <a href="http://highscalability.com/"><img id="banner" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/HSBannerTrebuchet.jpg" alt="High Scalability" title="High Scalability"></a>
+        </div>  
+
+      
+      
+      </div></div>
+    
+    
+    
+
+      <div id="navigationBottom"><div id="navigationBottom-sectionContent2191792" class="horizontalNavigationBar"><ul class="content-navigation">
+    
+  <li class="module active-module  " id="navigationBottom-moduleContentWrapper4867632">
+
+    <div id="navigationBottom-moduleContent4867632">
+
+              <a id="navigationBottom-moduleLink4867632" class=" " href="http://highscalability.com/"><span>Home</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper4850438">
+
+    <div id="navigationBottom-moduleContent4850438">
+
+              <a id="navigationBottom-moduleLink4850438" class=" " href="http://highscalability.com/blog/category/example"><span>Real Life Architectures</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper10576114">
+
+    <div id="navigationBottom-moduleContent10576114">
+
+              <a id="navigationBottom-moduleLink10576114" class=" " href="http://highscalability.squarespace.com/blog/category/strategy"><span>Strategies</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper4847294">
+
+    <div id="navigationBottom-moduleContent4847294">
+
+              <a id="navigationBottom-moduleLink4847294" class=" " href="http://highscalability.com/all-posts/"><span>All Posts</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper4850431">
+
+    <div id="navigationBottom-moduleContent4850431">
+
+              <a id="navigationBottom-moduleLink4850431" class=" " href="http://highscalability.com/advertising/"><span>Advertising</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper5498762">
+
+    <div id="navigationBottom-moduleContent5498762">
+
+              <a id="navigationBottom-moduleLink5498762" class=" " href="http://astore.amazon.com/possiboutpos-20"><span>Book Store</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper4850400">
+
+    <div id="navigationBottom-moduleContent4850400">
+
+              <a id="navigationBottom-moduleLink4850400" class=" " href="http://highscalability.com/start-here/"><span>Start Here</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper4850388">
+
+    <div id="navigationBottom-moduleContent4850388">
+
+              <a id="navigationBottom-moduleLink4850388" class=" " href="http://highscalability.com/contact/"><span>contact</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper15178301">
+
+    <div id="navigationBottom-moduleContent15178301">
+
+              <a id="navigationBottom-moduleLink15178301" class=" " href="http://highscalability.com/all-time-favorites/"><span>All Time Favorites</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper5861345">
+
+    <div id="navigationBottom-moduleContent5861345">
+
+              <a id="navigationBottom-moduleLink5861345" class=" " href="http://feeds.feedburner.com/HighScalability"><span>RSS</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper18971493">
+
+    <div id="navigationBottom-moduleContent18971493">
+
+              <a id="navigationBottom-moduleLink18971493" class=" " href="https://twitter.com/highscal"><span>Twitter</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper18971509">
+
+    <div id="navigationBottom-moduleContent18971509">
+
+              <a id="navigationBottom-moduleLink18971509" class=" " href="http://www.facebook.com/pages/Highscalability/441249225918692"><span>Facebook</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="navigationBottom-moduleContentWrapper19028422">
+
+    <div id="navigationBottom-moduleContent19028422">
+
+              <a id="navigationBottom-moduleLink19028422" class=" " href="https://plus.google.com/b/116966782604206517628/116966782604206517628/posts"><span>G+</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  </ul><br class="clearer"></div></div>
+
+
+  </div></div>
+  
+  
+
+  
+
+  
+  <div id="pageBodyWrapper"><div id="pageBody">
+  
+  <div id="sidebar1Wrapper" class="verticalNavigationBarWrapper"><div class="iw-vnb1"><div class="iw-vnb2"><div class="iw-vnb3"><div class="iw-vnb4"><div id="sidebar1" class="verticalNavigationBar">
+
+  
+
+    <div id="sectionContent2251797" class="sectionWrapper  "><div class="iw-s1"><div class="iw-s2"><div class="iw-s3"><div class="iw-s4"><div class="section">
+
+      
+
+      
+        
+          <div class="content-passthrough"><div id="moduleContentWrapper4876569" class="widget-wrapper  widget-type-search"><div id="moduleContent4876569">
+
+
+<!-- <form method="get" action="/display/Search">
+	<div class="search-form-pt-wrapper">
+	  <div class="search-form-pt">
+	    <span class="queryFieldWrapper"><input type="text" class="text queryField" name="searchQuery" value=""/></span>
+	    <span class="queryButtonWrapper"><input type="submit" class="button queryButton" value="&raquo;"/></span>
+	    <input type="hidden" name="moduleId" value="4876569"/>
+	    <br class="clearer"/>
+	  </div>
+	</div>
+</form> -->
+
+<form method="get" action="http://highscalability.com/display/Search">
+	<input type="hidden" name="moduleId" value="4876569">
+	<table class="search-form-pt-wrapper search-form-table" border="0" cellpadding="0" cellspacing="0">
+		<tbody><tr class="search-form-pt search-form-row">
+			<td class="queryFieldCell search-form-cell">
+				<span class="queryFieldWrapper">
+					<input type="text" class="text queryField" name="searchQuery" value="">
+				</span>
+			</td>
+			<td class="queryButtonCell search-form-cell">
+				<span class="queryButtonWrapper">
+					<input type="submit" class="button queryButton" value="→">
+				</span>
+			</td>
+		</tr>
+	</tbody></table> 
+</form></div></div></div>
+
+        
+
+      
+  
+    </div></div></div></div></div></div>
+
+  
+
+    <div id="sectionContent3898026" class="sectionWrapper  "><div class="iw-s1"><div class="iw-s2"><div class="iw-s3"><div class="iw-s4"><div class="section">
+
+      
+
+      
+        
+          <div class="content-passthrough"><div id="moduleContentWrapper9287263" class="widget-wrapper  widget-type-page"><div id="moduleContent9287263">
+
+
+
+
+
+  <center>
+  
+  <!-- SS_HS_Ad3 -->
+  
+  <div id="div-gpt-ad-1325175098795-10" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-10'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad3_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad3_0" name="google_ads_iframe_/1044643/SS_HS_Ad3_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div><iframe id="google_ads_iframe_/1044643/SS_HS_Ad3_0__hidden__" name="google_ads_iframe_/1044643/SS_HS_Ad3_0__hidden__" width="0" height="0" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom; visibility: hidden; display: none;"></iframe>
+  </div>
+  
+  
+  <!-- SS_HS_Ad4 -->
+  <div id="div-gpt-ad-1325175098795-11" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-11'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad4_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad4_0" name="google_ads_iframe_/1044643/SS_HS_Ad4_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+  
+  
+  <!-- SS_HS_Ad5 -->
+  <div id="div-gpt-ad-1325175098795-12" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-12'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad5_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad5_0" name="google_ads_iframe_/1044643/SS_HS_Ad5_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+  
+  
+  <!-- SS_HS_Ad6 -->
+  
+  <div id="div-gpt-ad-1325175098795-13" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-13'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad6_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad6_0" name="google_ads_iframe_/1044643/SS_HS_Ad6_0" width="126" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+  
+  <!-- SS_HS_ad7 
+  <div id='div-gpt-ad-1325175098795-14' style='width:125px; height:125px; margin: 3px;'>
+  <script type='text/javascript'>
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-14'); });
+  </script>
+  </div>
+  -->
+  
+  <!-- SS_HS_Ad8 -- 
+  <div id='div-gpt-ad-1325175098795-15' style='width:125px; height:125px; margin: 3px;'>
+  <script type='text/javascript'>
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-15'); });
+  </script>
+  </div>
+  -->
+  
+  <!-- SS_HS_Ad9 
+  <div id='div-gpt-ad-1325175098795-16' style='width:125px; height:125px; margin: 3px;'>
+  <script type='text/javascript'>
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-16'); });
+  </script>
+  </div>
+  -->
+  
+  <!-- SS_HS_Ad18 --
+  <div id='div-gpt-ad-1325175098795-17' style='width:125px; height:125px; margin: 3px;'>
+  <script type='text/javascript'>
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-17'); });
+  </script>
+  </div>
+  -->
+  
+  <!-- SS_HS_Ad19 
+  <div id='div-gpt-ad-1325175098795-18' style='width:125px; height:125px; margin: 3px;'>
+  <script type='text/javascript'>
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-18'); });
+  </script>
+  </div>
+  -->
+  
+  <!-- SS_HS_Ad20 
+  <div id='div-gpt-ad-1325175098795-19' style='width:125px; height:125px; margin: 3px;'>
+  <script type='text/javascript'>
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-19'); });
+  </script>
+  </div>
+  -->
+  
+  </center>
+</div></div></div>
+
+        
+
+      
+  
+    </div></div></div></div></div></div>
+
+  
+
+    <div id="sectionContent2191792" class="sectionWrapper promotedContainer "><div class="iw-s1"><div class="iw-s2"><div class="iw-s3"><div class="iw-s4"><div class="section">
+
+       <div class="caption">Top</div> 
+
+      
+        
+          <ul class="content-navigation">
+  <li class="module active-module  " id="moduleContentWrapper4867632">
+
+    <div id="moduleContent4867632">
+
+              <a id="moduleLink4867632" class=" " href="http://highscalability.com/"><span>Home</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4850438">
+
+    <div id="moduleContent4850438">
+
+              <a id="moduleLink4850438" class=" " href="http://highscalability.com/blog/category/example"><span>Real Life Architectures</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper10576114">
+
+    <div id="moduleContent10576114">
+
+              <a id="moduleLink10576114" class=" " href="http://highscalability.squarespace.com/blog/category/strategy"><span>Strategies</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4847294">
+
+    <div id="moduleContent4847294">
+
+              <a id="moduleLink4847294" class=" " href="http://highscalability.com/all-posts/"><span>All Posts</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4850431">
+
+    <div id="moduleContent4850431">
+
+              <a id="moduleLink4850431" class=" " href="http://highscalability.com/advertising/"><span>Advertising</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper5498762">
+
+    <div id="moduleContent5498762">
+
+              <a id="moduleLink5498762" class=" " href="http://astore.amazon.com/possiboutpos-20"><span>Book Store</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4850400">
+
+    <div id="moduleContent4850400">
+
+              <a id="moduleLink4850400" class=" " href="http://highscalability.com/start-here/"><span>Start Here</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4850388">
+
+    <div id="moduleContent4850388">
+
+              <a id="moduleLink4850388" class=" " href="http://highscalability.com/contact/"><span>contact</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper15178301">
+
+    <div id="moduleContent15178301">
+
+              <a id="moduleLink15178301" class=" " href="http://highscalability.com/all-time-favorites/"><span>All Time Favorites</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper5861345">
+
+    <div id="moduleContent5861345">
+
+              <a id="moduleLink5861345" class=" " href="http://feeds.feedburner.com/HighScalability"><span>RSS</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper18971493">
+
+    <div id="moduleContent18971493">
+
+              <a id="moduleLink18971493" class=" " href="https://twitter.com/highscal"><span>Twitter</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper18971509">
+
+    <div id="moduleContent18971509">
+
+              <a id="moduleLink18971509" class=" " href="http://www.facebook.com/pages/Highscalability/441249225918692"><span>Facebook</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper19028422">
+
+    <div id="moduleContent19028422">
+
+              <a id="moduleLink19028422" class=" " href="https://plus.google.com/b/116966782604206517628/116966782604206517628/posts"><span>G+</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+</ul>
+
+        
+
+      
+  
+    </div></div></div></div></div></div>
+
+  
+
+    <div id="sectionContent2248744" class="sectionWrapper  "><div class="iw-s1"><div class="iw-s2"><div class="iw-s3"><div class="iw-s4"><div class="section">
+
+       <div class="caption">Recent Posts</div> 
+
+      
+        
+          <div class="content-passthrough"><div id="moduleContentWrapper4867742" class="widget-wrapper  widget-type-journalarchive"><div id="moduleContent4867742">
+
+
+
+
+
+
+
+  <ul class="archive-item-list-pt">
+     <li><a href="http://highscalability.com/blog/2014/5/21/9-principles-of-high-performance-programs.html">9 Principles of High Performance Programs</a></li>  <li><a href="http://highscalability.com/blog/2014/5/20/its-networking-in-space-or-how-et-will-phone-home.html">It's Networking. In Space! Or How E.T. Will Phone Home.</a></li>  <li><a href="http://highscalability.com/blog/2014/5/19/a-short-on-how-the-wayback-machine-stores-more-pages-than-st.html">A Short On How the Wayback Machine Stores More Pages than Stars in the Milky Way</a></li>  <li><a href="http://highscalability.com/blog/2014/5/16/stuff-the-internet-says-on-scalability-for-may-16th-2014.html">Stuff The Internet Says On Scalability For May 16th, 2014</a></li>  <li><a href="http://highscalability.com/blog/2014/5/15/paper-swiftcloud-fault-tolerant-geo-replication-integrated-a.html">Paper: SwiftCloud: Fault-Tolerant Geo-Replication Integrated all the Way to the Client Machine</a></li>  <li><a href="http://highscalability.com/blog/2014/5/14/google-says-cloud-prices-will-follow-moores-law-are-we-all-r.html">Google Says Cloud Prices Will Follow Moore’s Law: Are We All Renters Now?</a></li>  <li><a href="http://highscalability.com/blog/2014/5/13/sponsored-post-apple-cloudant-copperegg-logentries-wargaming.html">Sponsored Post: Apple, Cloudant, CopperEgg, Logentries, Wargaming.net, PagerDuty, HelloSign, CrowdStrike, Gengo, ScaleOut Software, Couchbase, MongoDB, BlueStripe, AiScaler, Aerospike, LogicMonitor, AppDynamics, ManageEngine, Site24x7  </a></li>  <li><a href="http://highscalability.com/blog/2014/5/12/4-architecture-issues-when-scaling-web-applications-bottlene.html">4 Architecture Issues When Scaling Web Applications: Bottlenecks, Database, CPU, IO</a></li>  <li><a href="http://highscalability.com/blog/2014/5/9/stuff-the-internet-says-on-scalability-for-may-9th-2014.html">Stuff The Internet Says On Scalability For May 9th, 2014</a></li>  <li><a href="http://highscalability.com/blog/2014/5/7/update-on-disqus-its-still-about-realtime-but-go-demolishes.html">Update on Disqus: It's Still About Realtime, But Go Demolishes Python</a></li> 
+  </ul>
+
+
+
+</div></div></div>
+
+        
+
+      
+  
+    </div></div></div></div></div></div>
+
+  
+
+    <div id="sectionContent2248756" class="sectionWrapper  "><div class="iw-s1"><div class="iw-s2"><div class="iw-s3"><div class="iw-s4"><div class="section">
+
+       <div class="caption">All Time Favorites</div> 
+
+      
+        
+          <div class="content-passthrough"><div id="moduleContentWrapper4869720" class="widget-wrapper  widget-type-page"><div id="moduleContent4869720">
+
+
+
+
+
+  <ul style="padding-left: 0; margin-left: 0; list-style-type: square;">
+  <li><a href="http://highscalability.com/all-time-favorites/">More Favorites...</a></li>
+  <li><a href="http://highscalability.com/youtube-architecture">YouTube Architecture</a></li>
+  <li><a href="http://highscalability.com/plentyoffish-architecture">Plenty Of Fish Architecture</a></li>
+  <li><a href="http://highscalability.com/google-architecture">Google Architecture</a></li>
+  <li><a href="http://highscalability.com/blog/2011/12/19/how-twitter-stores-250-million-tweets-a-day-using-mysql.html">How Twitter Stores 250 Million Tweets A Day Using MySQL</a></li>
+  <li><a href="http://highscalability.com/scaling-twitter-making-twitter-10000-percent-faster">Scaling Twitter: Making Twitter 10000 Percent Faster</a></li>
+  <li><a href="http://highscalability.com/flickr-architecture">Flickr Architecture</a></li>
+  <li><a href="http://highscalability.com/amazon-architecture">Amazon Architecture</a></li>
+  <li><a href="http://highscalability.com/how-i-learned-stop-worrying-and-love-using-lot-disk-space-scale">How I Learned to Stop Worrying and Love Using a Lot of Disk Space to Scale</a></li>
+  <li><a href="http://highscalability.com/blog/2009/8/5/stack-overflow-architecture.html">Stack Overflow Architecture</a> </li>
+  <li><a href="http://highscalability.com/blog/category/facebook">Facebook</a></li>
+  <li><a href="http://highscalability.com/blog/2009/8/6/an-unorthodox-approach-to-database-design-the-coming-of-the.html">An Unorthodox Approach to Database Design : The Coming of the Shard</a></li>
+  <li><a href="http://highscalability.com/blog/2009/12/16/building-super-scalable-systems-blade-runner-meets-autonomic.html">Building Super Scalable Systems: Blade Runner Meets Autonomic Computing in the Ambient&nbsp;Cloud</a></li>
+  <li><a href="http://highscalability.com/blog/2009/3/16/are-cloud-based-memory-architectures-the-next-big-thing.html">Are Cloud Based Memory Architectures the Next Big Thing?</a></li>
+  <li><a href="http://highscalability.com/blog/2009/7/25/latency-is-everywhere-and-it-costs-you-sales-how-to-crush-it.html">Latency is Everywhere and it Costs You Sales - How to Crush it</a></li>
+  <li><a href="http://highscalability.com/blog/2010/5/5/how-will-memristors-change-everything.html">How will memristors change everything?</a>&nbsp;</li>
+  <li><a href="http://highscalability.com/blog/2011/11/29/datasift-architecture-realtime-datamining-at-120000-tweets-p.html">DataSift Architecture: Realtime Datamining At 120,000 Tweets Per Second</a></li>
+  <li><a href="http://highscalability.com/blog/category/blog">Useful Scalability Blogs</a></li>
+  <li><a href="http://highscalability.com/blog/category/blog"></a><a class="journal-entry-navigation-current" href="http://highscalability.com/blog/2009/7/16/scaling-traffic-people-pod-pool-of-on-demand-self-driving-ro.html">Scaling Traffic: People Pod Pool of On Demand Self Driving Robotic Cars who Automatically Refuel from Cheap&nbsp;Solar</a></li>
+  <li><a href="http://highscalability.com/blog/2010/6/28/voltdb-decapitates-six-sql-urban-myths-and-delivers-internet.html">VoltDB Decapitates Six SQL Urban Myths And Delivers Internet Scale OLTP In The Process</a></li>
+  <li><a href="http://highscalability.com/blog/2009/8/7/the-canonical-cloud-architecture.html">The Canonical Cloud Architecture&nbsp;</a></li>
+  <li><a href="http://highscalability.com/blog/2010/3/16/justintvs-live-video-broadcasting-architecture.html">Justin.Tv's Live Video Broadcasting Architecture</a></li>
+  <li><a href="http://highscalability.com/blog/2009/10/13/why-are-facebook-digg-and-twitter-so-hard-to-scale.html">Why Are Facebook, Digg, And Twitter So Hard To Scale?</a></li>
+  <li><a href="http://highscalability.com/blog/2010/12/6/what-the-heck-are-you-actually-using-nosql-for.html">What The Heck Are You Actually Using NoSQL For?</a></li>
+  <li><a href="http://highscalability.com/blog/2010/9/21/playfishs-social-gaming-architecture-50-million-monthly-user.html">Playfish's Social Gaming Architecture - 50 Million Monthly Users And Growing</a> </li>
+  <li><a href="http://highscalability.com/blog/2011/5/2/the-updated-big-list-of-articles-on-the-amazon-outage.html">The Updated Big List Of Articles On The Amazon Outage</a> </li>
+  <li><a href="http://highscalability.com/all-time-favorites/">More Favorites...</a></li>
+  </ul>
+</div></div></div>
+
+        
+
+      
+  
+    </div></div></div></div></div></div>
+
+  
+
+  
+
+</div></div></div></div></div></div>
+  <div id="sidebar2Wrapper" class="verticalNavigationBarWrapper"><div class="iw-vnb1"><div class="iw-vnb2"><div class="iw-vnb3"><div class="iw-vnb4"><div id="sidebar2" class="verticalNavigationBar">
+
+  
+
+    <div id="sectionContent2249261" class="sectionWrapper  "><div class="iw-s1"><div class="iw-s2"><div class="iw-s3"><div class="iw-s4"><div class="section">
+
+      
+
+      
+        
+          <div class="content-passthrough"><div id="moduleContentWrapper4869210" class="widget-wrapper  widget-type-page"><div id="moduleContent4869210">
+
+
+
+
+
+  <center>
+  <!-- SS_HS_Ad1 -->
+  <div id="div-gpt-ad-1325175098795-0" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-0'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad1_0" name="google_ads_iframe_/1044643/SS_HS_Ad1_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad10 -->
+  <div id="div-gpt-ad-1325175098795-1" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-1'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad10_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad10_0" name="google_ads_iframe_/1044643/SS_HS_Ad10_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad11 -->
+  <div id="div-gpt-ad-1325175098795-2" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-2'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad11_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad11_0" name="google_ads_iframe_/1044643/SS_HS_Ad11_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad12 -->
+  <div id="div-gpt-ad-1325175098795-3" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-3'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad12_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad12_0" name="google_ads_iframe_/1044643/SS_HS_Ad12_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad13 -->
+  <div id="div-gpt-ad-1325175098795-4" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-4'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad13_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad13_0" name="google_ads_iframe_/1044643/SS_HS_Ad13_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad14 -->
+  <div id="div-gpt-ad-1325175098795-5" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-5'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad14_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad14_0" name="google_ads_iframe_/1044643/SS_HS_Ad14_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad15 -->
+  <div id="div-gpt-ad-1325175098795-6" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-6'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad15_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad15_0" name="google_ads_iframe_/1044643/SS_HS_Ad15_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad16 -->
+  <div id="div-gpt-ad-1325175098795-7" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-7'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad16_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad16_0" name="google_ads_iframe_/1044643/SS_HS_Ad16_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad17 -->
+  <div id="div-gpt-ad-1325175098795-8" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-8'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad17_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad17_0" name="google_ads_iframe_/1044643/SS_HS_Ad17_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+   
+  <!-- SS_HS_Ad2 -->
+  <div id="div-gpt-ad-1325175098795-9" style="width:125px; height:125px; margin: 3px;">
+  <script type="text/javascript">
+  googletag.cmd.push(function() { googletag.display('div-gpt-ad-1325175098795-9'); });
+  </script><div id="google_ads_iframe_/1044643/SS_HS_Ad2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1044643/SS_HS_Ad2_0" name="google_ads_iframe_/1044643/SS_HS_Ad2_0" width="125" height="125" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" src="javascript:"<html><body style='background:transparent'></body></html>"" style="border: 0px; vertical-align: bottom;"></iframe></div>
+  </div>
+  
+  
+  
+  
+  
+  </center>
+  
+  <center><a href="http://highscalability.com/advertising">advertise</a></center>
+</div></div></div>
+
+        
+
+      
+  
+    </div></div></div></div></div></div>
+
+  
+
+    <div id="sectionContent2191793" class="sectionWrapper  "><div class="iw-s1"><div class="iw-s2"><div class="iw-s3"><div class="iw-s4"><div class="section">
+
+      
+
+      
+        
+          <ul class="content-navigation">
+  <li class="module   " id="moduleContentWrapper4708561">
+
+    <div id="moduleContent4708561">
+
+              <a id="moduleLink4708561" class=" " href="http://highscalability.com/login/?returnUrl=%2Fblog%2F2013%2F4%2F3%2F5-steps-to-benchmarking-managed-nosql-dynamodb-vs-cassandra.html"><span>Login</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4869034">
+
+    <div id="moduleContent4869034">
+
+              <a id="moduleLink4869034" class=" " href="http://highscalability.com/register/"><span>Register</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper15178453">
+
+    <div id="moduleContent15178453">
+
+              <a id="moduleLink15178453" class=" " href="http://highscalability.com/all-time-favorites/"><span>All Time Favorites</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4870172">
+
+    <div id="moduleContent4870172">
+
+              <a id="moduleLink4870172" class=" " href="http://highscalability.squarespace.com/blog/category/product"><span>Useful Products</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4870194">
+
+    <div id="moduleContent4870194">
+
+              <a id="moduleLink4870194" class=" " href="http://highscalability.squarespace.com/blog/category/paper"><span>Useful Papers</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4870201">
+
+    <div id="moduleContent4870201">
+
+              <a id="moduleLink4870201" class=" " href="http://highscalability.squarespace.com/blog/category/strategy"><span>Useful Strategies</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4885586">
+
+    <div id="moduleContent4885586">
+
+              <a id="moduleLink4885586" class=" " href="http://highscalability.com/blog/category/blog"><span>Useful Blogs</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4920227">
+
+    <div id="moduleContent4920227">
+
+              <a id="moduleLink4920227" class=" " href="http://highscalability.com/blog/category/book"><span>Useful Books</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper12001611">
+
+    <div id="moduleContent12001611">
+
+              <a id="moduleLink12001611" class=" " href="http://highscalability.com/blog/2011/9/14/big-list-of-scalabilty-conferences.html"><span>Useful Conferences</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+
+  <li class="module   " id="moduleContentWrapper4878991">
+
+    <div id="moduleContent4878991">
+
+              <a id="moduleLink4878991" class="offsite-link " href="http://astore.amazon.com/possiboutpos-20" onclick="this.target=&#39;new&#39;;"><span>Book Store</span></a>
+      
+
+      
+
+    </div>
+
+  </li>
+
+</ul>
+
+        
+
+      
+  
+    </div></div></div></div></div></div>
+
+  
+
+    <div id="sectionContent2248734" class="sectionWrapper  "><div class="iw-s1"><div class="iw-s2"><div class="iw-s3"><div class="iw-s4"><div class="section">
+
+      
+
+      
+        
+          <div class="content-passthrough"><div id="moduleContentWrapper4867711" class="widget-wrapper  widget-type-rss-syndicate"><div id="moduleContent4867711">
+
+
+
+  <ul class="feed-list-inline">
+    
+          <li><a href="http://feeds.feedburner.com/HighScalability" class="feed-link">High Scalability RSS</a></li>
+        
+          <li><a href="http://highscalability.com/blog/rss-comments.xml" class="feed-link">High Scalability Comments RSS</a></li>
+        
+  </ul>
+
+</div></div></div>
+
+        
+
+      
+  
+    </div></div></div></div></div></div>
+
+  
+
+  
+
+</div></div></div></div></div></div>
+  
+  
+
+  <div id="contentWrapper"><div id="content">
+    
+          
+    
+
+
+  
+
+  
+  
+      
+  <div class="journal-entry-navigation">
+
+    
+       <a class="journal-entry-navigation-prev" href="http://highscalability.com/blog/2013/4/4/paper-a-web-of-things-application-architecture-integrating-t.html">« Paper:  A Web of Things Application Architecture - Integrating the Real-World into the Web</a> | 
+      <a class="journal-entry-navigation-main" href="http://highscalability.com/blog/">Main</a>
+       | <a class="journal-entry-navigation-next" href="http://highscalability.com/blog/2013/4/2/sponsored-post-rackspace-simple-fitbit-amazon-booking-aicach.html">Sponsored Post: Rackspace, Simple, Fitbit, Amazon, Booking, aiCache, Aerospike, Percona, ScaleOut, New Relic, LogicMonitor, AppDynamics, ManageEngine, Site24x7 »</a> 
+
+    
+
+  </div>
+
+
+  
+  
+  <div class="single-journal-entry-wrapper">
+    
+
+
+<div class="journal-entry-wrapper post-text authored-by-benb category-benchmark">
+<div id="item33181537" class="journal-entry">
+
+  <div class="journal-entry-float-day"><span class="name">Wednesday</span></div><div class="journal-entry-float-date"><span class="month">Apr</span><span class="date">03</span><span class="year">2013</span></div>
+  
+  
+  
+  <div class="journal-entry-text">
+  
+      
+      <h2 class="title">
+    
+        
+    
+        <a class="journal-entry-navigation-current" href="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -.html">5 Steps to Benchmarking Managed NoSQL - DynamoDB vs&nbsp;Cassandra</a>  
+     
+         
+    
+      </h2>
+      
+       <div class="journal-entry-tag journal-entry-tag-post-title"><span class="posted-on">   <img title="Date" alt="Date" class="inline-icon date-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png">Wednesday, April 3, 2013 at 9:25AM</span> </div> 
+
+    
+  
+      
+      <div class="body">
+  
+        
+        
+        
+          <p><em>This is a guest post by <a href="http://www.linkedin.com/in/benbromhead">Ben Bromhead</a> from <a href="https://www.instaclustr.com/?cid=hs-bench">Instaclustr</a></em></p>
+
+<p><img src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/3296379139_7b768490a9_m.jpg" align="RIGHT"></p>
+
+<p>Deciding to use a managed NoSQL datastore is a great step in ensuring you run a fast, scalable and resilient application without needing to be an expert in highly available architecture. How do you know which technology is the best for your application? How do you know whether the provider's performance claims are true? You are putting your application on someone else’s infrastructure and that requires some hard answers about their claims.</p>
+
+<p>To determine the suitability of a provider, your first port of call is to benchmark. Choosing a service provider is often done in a number of stages. First is to shortlist providers based on capabilities and claimed performance, ruling out those that do not meet your application requirements. Second is to look for benchmarks conducted by third parties, if any. The final stage is to benchmark the service yourself.</p>
+
+<p>In this article we will show you how to run some preliminary benchmarks against two managed NoSQL systems. For this test we will compare <a href="https://www.instaclustr.com/?cid=hs-bench">Instaclustr</a> and <a href="http://aws.amazon.com/dynamodb/">Amazon DynamoDB</a> using the Yahoo Cloud Serving Benchmark (<a href="https://github.com/brianfrankcooper/YCSB">YCSB</a>). <a href="https://www.instaclustr.com/?cid=hs-bench">Instaclustr</a> provides managed Apache Cassandra hosting and <a href="http://aws.amazon.com/dynamodb/">DynamoDB</a> is Amazons own managed key value store solution.</p>
+
+<p>Both Cassandra and DynamoDB are very similar architecturally and both Instaclustr and DynamoDB services run on Amazon's cloud infrastructure, so it will be an excellent performance test and comparison of the two.</p>
+
+<h2>Step 1 - Client Setup</h2>
+
+<p>YCSB is a cloud service testing client that performs reads, writes and updates according to specified workloads. Running from the command line it can create an arbitrary number of threads that will query the system under test. It will measure throughput in operations per second and record the latency in performing these operations.</p>
+
+<p>YCSB can run in parallel from multiple hosts. For this article we will deploy YCSB across 4 High-CPU Extra Large EC2 instances (c1.xlarge), however you can just as easily run this from a single instance. Investigate EC2 spot pricing to reduce the cost of benchmarking. </p>
+
+<p>Launch each instance with a <a href="http://cloud-images.ubuntu.com/locator/ec2/">Ubuntu based AMI</a>. Make a note of the security group you assign to the instances and the region you deployed them in. Once the instances have booted, SSH into each instance (replacing ec2-XXX-XXX-XXX-XXX.compute-1.amazonaws.com with the DNS name of your instance): </p>
+
+<p><code>ssh –i /path/to/your/key.pem ubuntu@ec2-XXX-XXX-XXX-XXX.compute-1.amazonaws.com</code></p>
+
+<p>Install the required dependencies using apt-get:</p>
+
+<p><code>sudo apt-get update</code> <br>
+<code>sudo apt-get -y install --fix-missing libjna-java htop sysstat iftop binutils pssh pbzip2 openssl maven2 ant liblzo2-dev ntp tree xfsprogs openjdk-6-jdk git</code>  </p>
+
+<p>Clone the YCSB and Cassandra git repositories:</p>
+
+<p><code>git clone https://github.com/apache/cassandra.git</code> <br>
+<code>git clone https://github.com/brianfrankcooper/YCSB.git</code></p>
+
+<p>Change to the Cassandra directory and build Cassandra:</p>
+
+<p><code>cd Cassandra</code> <br>
+<code>ant</code></p>
+
+<p>Copy the Cassandra libraries to the YCSB directory:</p>
+
+<p><code>mkdir ~/YCSB/Cassandra/lib</code> <br>
+<code>cp ~/Cassandra/build/*.jar ~/YCSB/Cassandra/lib</code> <br>
+<code>cp ~/Cassandra/lib/*.jar ~/YCSB/Cassandra/lib</code>  </p>
+
+<p>Change to the YCSB directory:</p>
+
+<p><code>cd ~/YCSB</code></p>
+
+<p>Edit the pom.xml file. Under the modules tag, remove all the services you do not wish to test (except core). For this example the modules portion of the pom.xml should look like this:</p>
+
+<pre><code>&lt;modules&gt;
+
+    &lt;module&gt;cassandra&lt;/module&gt;
+
+    &lt;module&gt;core&lt;/module&gt;
+
+    &lt;module&gt;dynamodb&lt;/module&gt;
+
+&lt;/modules&gt;
+</code></pre>
+
+<p>Build YCSB:</p>
+
+<p><code>mvn package</code></p>
+
+<h2>Step 2 - Service Setup</h2>
+
+<p><a href="https://www.instaclustr.com/account/signup?cid=">Sign up</a> to Instaclustr and create a new cluster. </p>
+
+<p>Select the region you wish to deploy to, ensuring that the region you choose is the same region containing your test client instances (created in step 1). For this test we will choose Instaclustr's professional tier as it roughly corresponds to the same price as DynamoDB's highest capacity table you can request without needing to ask Amazon to increase your account limits.</p>
+
+<p>Instaclustr will ask you to select a SSH key to associate with the cluster (you can also generate a new key from the cluster creation page). Accept the terms and conditions and hit “Create Cluster”. This will cost around $8.88 an hour plus transfer and S3 costs.</p>
+
+<p>While Instaclustr deploys your Cassandra cluster we will create the DynamoDB table.</p>
+
+<p>Log into your <a href="http://console.aws.amazon.com/">AWS console</a> and go to the DynamoDB console page. Click “Create Table”.</p>
+
+<p>Set the <em>Name</em> for your DynamoDB table to be <code>usertable</code> and set the <em>Primary Key Type</em> to <code>Hash</code>. Set the <em>Hash Attribute Name</em> to <code>firstname</code>. Click next and set the <em>Read</em> and <em>Write</em> capacities to <code>10000</code>.  Click next until done, skipping the cloud watch configuration page, to create the table. This will cost around $7.80 plus storage and transfer costs per hour.</p>
+
+<p>While you are in the AWS console, go to the EC2 console page. Click on security groups and allow <em>All TCP</em>, <em>All UDP</em> and <em>All IMCP</em> packets between the test client security group you selected in step 1 and your Instaclustr security group (called instaclustr-yourname-yourclustername-group). You can do this by entering the security group id into the source box when setting security group rules.</p>
+
+<p>Your DynamoDB table will take a little while to create. While waiting let's go back to the test clients and configure the tests.</p>
+
+<h2>Step 3 - Test configuration</h2>
+
+<p>Edit the file ~/YCSB/dynamodb/conf/AWSCredentials.properties and set the AccessKey and SecretKey properties to those of your account (remember to uncomment the lines by deleting the #).</p>
+
+<p>Edit ~/YCSB/dynamodb/conf/dynamodb.properties and set the path to the AWSCredentials.properties file. If you created your test clients in a different region to us-east1 change the DynamoDB endpoint to match and leave the rest of the settings as is.</p>
+
+<p>Your dynamodb properties file should contain something similar to the following:</p>
+
+<pre><code>dynamodb.awsCredentialsFile = dynamodb/conf/AWSCredentials.properties
+dynamodb.primaryKey = firstname
+dynamodb.endpoint = http://dynamodb.us-east-1.amazonaws.com
+</code></pre>
+
+<p>Go back to your Instaclustr <a href="https://www.instaclustr.com/dashboard/clusters">dashboard</a> and open OpsCenter for your cluster. Click <em>Data Modeling</em> (in the left hand menu) and click <em>Add Keyspace</em>. Set the <em>Name</em> to <code>usertable</code> and <em>replication</em>factor_ to <code>3</code>. Untick <em>I would like to create a Column Family</em> and click <em>Save Keyspace</em>. Go back to your Instaclustr dashboard and make note of the public DNS names for the nodes in your Cassandra cluster.</p>
+
+<p>On one of your test client instances run the following command, replacing ec2-XXX-XXX-XXX-XXX.compute-1.amazonaws.com with the DNS name for one of your Cassandra nodes: </p>
+
+<p><code>~/Cassandra/bin/Cassandra-cli –h ec2-XX-XX-XX-XX.compute-1.amazonaws.com</code> </p>
+
+<p>Run the following commands in the Cassandra CLI:</p>
+
+<pre><code>USE usertable;
+CREATE COLUMN FAMILY data with column_type = 'Standard'
+    and comparator = 'UTF8Type'
+    and default_validation_class = 'UTF8Type'
+    and key_validation_class = 'UTF8Type'
+    and read_repair_chance = 0.1
+    and dclocal_read_repair_chance = 0.0
+    and caching = 'ALL';
+QUIT;
+</code></pre>
+
+<p>On each of your test client instances, create a file in the ~/YCSB directory called Cassandra.props containing the following. For each separate test client set the <em>insertstart</em> property to be <code>0</code>, <code>2500000</code>, <code>5000000</code> and <code>7500000</code> respectively. This means they will write different portions of data to the cluster. Set the <em>hosts</em> property to the DNS names of the Cassandra nodes (replacing ec2-XX-XX-XX-XX.compute-1.amazonaws.com etc with the DNS names of your Cassandra nodes).</p>
+
+<pre><code>recordcount=10000000
+insertstart=0             # This should be different for each client instance
+insertcount=2500000
+hosts=ec2-XX-XX-XX-XX.compute-1.amazonaws.com,ec2-YY-YY-YY- YY.compute-1.amazonaws.com, ec2-AA-AA-AA-AA.compute-1.amazonaws.com …
+</code></pre>
+
+<p>Create a file in the ~/YCSB directory called dynamo.props and fill it with the same information as the Cassandra.props file leaving the hosts setting out. Again, for each separate test client set the <em>insertstart</em> property to be <code>0</code>, <code>2500000</code>, <code>5000000</code> and <code>7500000</code> respectively. So it should look something like this:</p>
+
+<pre><code>recordcount=10000000
+insertstart=0               # This should be different for each client instance
+insertcount=2500000
+</code></pre>
+
+<p>If you are using a single test client you can leave insertstart and insertcount out of both files.</p>
+
+<h2>Step 4 - Running the benchmark</h2>
+
+<p>Now for the fun bit, running the tests!</p>
+
+<p>On each test client instance, from inside the ~/YCSB directory, run: </p>
+
+<p><code>./bin/ycsb load cassandra-10 -P workloads/workloada -P cassandra.props -threads 50 -s &gt; loaddata-cassandra.results</code></p>
+
+<p>This command tells YCSB to run the <em>load</em> component of workload A (which inserts data that subsequent tests rely on) using the cassandra-1.* client (<code>load cassandra-10 -P workloads/workloada</code>), it also tells YCSB to load our configuration file (<code>-P cassandra.props</code>), use 50 client threads (<code>-threads 50</code>) and output status updates to stderr and test results to the loaddata-cassandra.results file (<code>-s &gt; loaddata-cassandra.results</code>).</p>
+
+<p>This will load data into Instaclustr and test its write throughput. YCSB will output status updates about the test every 10 seconds during the test.</p>
+
+<p>To load data into your DynamoDB table run:
+<code>./bin/ycsb load dynamodb -P workloads/workloada -P dynamodb.props  -P dynamodb/conf/dynamodb.properties -threads 50 -s &gt; loaddata-dynamodb.results</code></p>
+
+<p>Once the workload A data is loaded into both Instaclustr and DynamoDB you can execute different YCSB workloads. Different workloads will have different proportions of read, write and update operations that they test. Each workload is split into a load and run portion. The load component will pre-fill the database with the required data and the run component will perform the workload to be measured. For example the run portion of workload A (which we used to load some data) consists of a 50 / 50 split of read and write operations. The load operation for workload A is similar to that of the other tests and hence the data generated from it can be reused. </p>
+
+<p>To start workload A, run:</p>
+
+<p><code>./bin/ycsb run cassandra-10 -P workloads/workloada -P cassandra.props -threads 50 -p operationcount=10000000 -s &gt; workloada-cassandra.results</code></p>
+
+<p>and for DynamoDB, run:</p>
+
+<p><code>./bin/ycsb run dynamodb -P workloads/workloada -P dynamodb.props  -P dynamodb/conf/dynamodb.properties -threads 50 -p operationcount=10000000 -s &gt; workloada-dynamodb.results</code></p>
+
+<p>Other workloads have different usage patterns and may be more appropriate for testing a particular technology for your specific use case. You can also use the load stage of Workload A as a measure of system write performance.</p>
+
+<p>At the end of each test, YCSB will output a summary of the test. This will be found in the piped output results files created in the YCSB directory (workloada-cassandra.results, etc).</p>
+
+<p>For more information on YCSB workloads and tests see the <a href="https://github.com/brianfrankcooper/YCSB/wiki/Core-Workloads">core workloads page</a>.</p>
+
+<h2>Step 5 - The results</h2>
+
+<p>Evaluate the results against your application throughput and latency requirements. Remember to sum the average throughput of each YCSB client to get the total average throughput. YCSB also reports the 95th and 99th percentile latencies for each test.</p>
+
+<p><em>Stopwatch image courtesy of <a href="http://www.flickr.com/photos/wwarby/3296379139/">William Warby</a></em></p>
+
+
+        
+  
+          
+  
+         
+  
+      </div>
+
+    
+
+  </div>
+
+      <div class="journal-entry-tag journal-entry-tag-post-body">
+      <div class="journal-entry-tag-post-body-line1"><span class="posted-by">  <a href="http://highscalability.com/blog/author/benb"> <img title="Author" alt="Author" class="inline-icon user-registered-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png">Ben Bromhead</a></span> |  <span class="post-comments"><a href="http://highscalability.com/blog/2013/4/3/5-steps-to-benchmarking-managed-nosql-dynamodb-vs-cassandra.html#comments"> <img title="Comment" alt="Comment" class="inline-icon comment-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png">3 Comments</a></span> |  <span class="permalink-item"><a class="permalink" href="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -.html"> <img title="Permalink" alt="Permalink" class="inline-icon permalink-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png">Permalink </a></span> |  <span class="share-item"><a href="javascript:noop();" onclick="Squarespace.Interaction.shareLink(this,&#39;%2Fblog%2F2013%2F4%2F3%2F5-steps-to-benchmarking-managed-nosql-dynamodb-vs-cassandra.html&#39;,&#39;5%20Steps%20to%20Benchmarking%20Managed%20NoSQL%20-%20DynamoDB%20vs%20Cassandra&#39;);"> <img title="Share Article" alt="Share Article" class="inline-icon share-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png">Share Article </a></span> <span class="print-item"><a href="http://highscalability.com/blog/2013/4/3/5-steps-to-benchmarking-managed-nosql-dynamodb-vs-cassandra.html?printerFriendly=true"> <img title="Print Article" alt="Print Article" class="inline-icon print-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png">Print Article </a></span> <span class="email-item"><a href="http://highscalability.com/blog/recommend/33181537"> <img title="Email Article" alt="Email Article" class="inline-icon email-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png">Email Article </a></span> </div>
+      <div class="journal-entry-tag-post-body-line2"><span class="posted-in">in <span class="tag-element"><a rel="tag" href="http://highscalability.com/blog/category/benchmark"> <img title="Category" alt="Category" class="inline-icon category-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png">benchmark</a></span></span>  <span class="post-snippet-1"><iframe src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/like.html" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:80px;" allowtransparency="true"></iframe></span> <span class="post-snippet-2"><iframe id="twitter-widget-0" scrolling="no" frameborder="0" allowtransparency="true" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/tweet_button.1400006231.html" class="twitter-share-button twitter-tweet-button twitter-share-button twitter-count-horizontal" title="Twitter Tweet Button" data-twttr-rendered="true" style="width: 110px; height: 20px;"></iframe><script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/widgets.js"></script></span> </div>
+      <div class="journal-entry-tag-post-body-line3"></div>
+    </div>
+  
+  
+  <div class="clearer"></div>
+
+</div>
+</div>
+
+
+
+
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="journal-comment-area-wrapper">
+    <div id="comments" class="journal-comment-area">
+
+      <h3 class="caption">Reader Comments  (3) </h3>
+
+      
+        
+  <div class="comment-wrapper authored-by-None">
+  <div class="comment" id="comment19897575">
+
+    <div id="item19897575" class="body">
+
+      <p>This post should sell T-shirts:</p><p></p><blockquote>I came here to gain irrelevant link-ammo for uninformed internet debates on tool choices, and all I got was this lousy reasoned advice on how to evaluate services to find the right tool for my specific workload.</blockquote><p></p>
+
+    </div>
+    <div class="signature">
+
+      April 3, 2013 | 
+  <a href="http://highscalability.com/contributor/21274303" title="Unregistered Commenter">
+  <img title="Unregistered Commenter" alt="Unregistered Commenter" class="inline-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png" style="background:transparent url(/universal/images/core-resources/icons/smalllight/user-unregistered.png) top left no-repeat;">Wes Winham
+  
+  </a>
+
+
+
+      
+        
+
+        
+
+      
+
+    </div>
+
+  </div>
+  </div>
+
+
+  <div class="comment-wrapper authored-by-None">
+  <div class="comment" id="comment19910960">
+
+    <div id="item19910960" class="body">
+
+      <p>Why was an actual benchmark not run?</p>
+
+    </div>
+    <div class="signature">
+
+      April 7, 2013 | 
+  <a href="http://highscalability.com/contributor/21289840" title="Unregistered Commenter">
+  <img title="Unregistered Commenter" alt="Unregistered Commenter" class="inline-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png" style="background:transparent url(/universal/images/core-resources/icons/smalllight/user-unregistered.png) top left no-repeat;">Jared
+  
+  </a>
+
+
+
+      
+        
+
+        
+
+      
+
+    </div>
+
+  </div>
+  </div>
+
+
+  <div class="comment-wrapper authored-by-None">
+  <div class="comment" id="comment20147157">
+
+    <div id="item20147157" class="body">
+
+      <p>Useless... there isn't a single test run done, no troubleshooting if something goes wrong (lotsa moving parts). What a waste.</p>
+
+    </div>
+    <div class="signature">
+
+      July 15, 2013 | 
+  <a href="http://highscalability.com/contributor/21680148" title="Unregistered Commenter">
+  <img title="Unregistered Commenter" alt="Unregistered Commenter" class="inline-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png" style="background:transparent url(/universal/images/core-resources/icons/smalllight/user-unregistered.png) top left no-repeat;">M.
+  
+  </a>
+
+
+
+      
+        
+
+        
+
+      
+
+    </div>
+
+  </div>
+  </div>
+
+
+
+        
+
+      
+
+    </div>
+    </div>
+
+    
+      <div class="journal-add-comment-area-wrapper">
+  
+          
+            
+            
+  <script type="text/javascript">
+  // <![CDATA[
+
+    var isAddCommentsVisible = true;
+
+    function toggleReferenceMode() {
+      if (isAddCommentsVisible) {
+        hideObject(document.getElementById("add-comment-area"));
+        showObject(document.getElementById("add-reference-area"));
+      } else {
+        showObject(document.getElementById("add-comment-area"));
+        hideObject(document.getElementById("add-reference-area"));
+      }
+      isAddCommentsVisible = !isAddCommentsVisible;
+    }
+
+    E.addListener("postform", "keydown", Squarespace.SessionAuthorizationKey.acquireAuthKey, '');
+
+  // ]]>
+  </script>
+
+  <form method="post" style="margin: 0; padding: 0;" name="postform" id="postform" action="http://highscalability.com/process/CreateJournalEntryComment?moduleId=4867632&entryId=33181537"> 
+
+     <input type="hidden" name="currentPage" value="1"> 
+ 
+    <div class="notice-box" style="margin-top: 2em;" id="add-comment-area">
+
+      
+                              <h3 class="caption"><img title="Post" alt="Post" class="inline-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png" style="background:transparent url(/universal/images/core-resources/icons/smalllight/comment.png) top left no-repeat;">Post a New Comment</h3>
+          
+        
+
+        <div class="caption-text">
+
+          Enter your information below to add a new comment.
+
+          
+
+        </div>
+
+        
+
+        <script type="text/javascript" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/storable-fields.js"></script>
+
+        
+          <div class="input-field">
+            
+            <div id="authorName_title" class="title">
+               Author: 
+
+              &nbsp;<a id="storedFieldControls" style="display: none; font-size: 9px;" href="javascript:forgetSavedFields();">(forget stored information)</a>
+            </div>
+            <input class="text" type="text" style="width: 200px;" name="authorName" id="authorName" value="" maxlength="50" tabindex="2">
+          </div>
+
+          <div class="input-field">
+            
+            <div id="authorEmail_title" class="title"> Author Email (optional): 
+</div>
+            <input class="text" type="text" style="width: 200px;" name="authorEmail" id="authorEmail" value="" maxlength="255" tabindex="3">
+          </div>
+
+          <div class="input-field">
+            
+            <div id="authorUrl_title" class="title"> Author URL (optional): 
+</div>
+            <input class="text" type="text" style="width: 200px;" name="authorUrl" id="authorUrl" value="" maxlength="255" tabindex="4">
+          </div>
+
+          <script type="text/javascript">
+
+            YAHOO.util.Event.addListener(window, "load", function() {
+
+              document.getElementById("storedFieldControls").style.display = (Squarespace.StorableFields.isDataSaved("authorName", "authorEmail", "authorUrl") ? "inline" : "none");
+              Squarespace.StorableFields.recall("authorName", "authorEmail", "authorUrl");
+
+            });
+
+            function forgetSavedFields() {
+
+              Squarespace.StorableFields.forget("authorName", "authorEmail", "authorUrl");
+              document.getElementById("storedFieldControls").style.display = "none";
+
+            }
+
+          </script>
+
+        
+
+        <script type="text/javascript">
+          function expandBody() { b = document.getElementById("body"); b.style.height = (b.offsetHeight + 40) + "px"; }
+          function shrinkBody() { b = document.getElementById("body"); b.style.height = (b.offsetHeight - 40) + "px"; }
+        </script>
+
+        
+        <div id="body_title" style="padding-bottom: 5px; float: left;"> Post: 
+</div>
+        <div style="padding-bottom: 5px; float: right;"><a title="Increase the size of the comment area." href="javascript:expandBody();">↓</a> | <a title="Decrease the size of the comment area." href="javascript:shrinkBody();">↑</a></div>
+        <div class="clearer">&nbsp;</div>
+        <div style="padding-bottom: 5px;"><textarea rows="15" cols="60" name="body" id="body" tabindex="5"></textarea></div>
+        <div style="padding-bottom: 5px;">Some HTML allowed: &lt;a href="" title=""&gt; &lt;abbr title=""&gt; &lt;acronym title=""&gt; &lt;b&gt; &lt;blockquote cite=""&gt; &lt;code&gt; &lt;em&gt; &lt;i&gt; &lt;strike&gt; &lt;strong&gt;</div>
+
+        
+
+        
+
+        <div class="footer">
+
+                      <div class="notice-box-alert">
+              <div class="icon"><img title="Alert" alt="Alert" class="inline-icon" rel="smalllight" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/transparent.png" style="background:transparent url(/universal/images/core-resources/icons/smalllight/alert.png) top left no-repeat;"></div>
+              <div class="text">
+                <strong>Comment Moderation Enabled</strong><br>
+                Your comment will not appear until it has been cleared by a website editor.
+              </div>
+            </div>
+          
+
+                    
+            <p style="padding-bottom: 10px;"><input class="checkbox" type="checkbox" name="followOptIn" id="followOptIn" value="true" tabindex="6">
+              <span onclick="toggleNotify()" style="cursor: pointer; cursor: hand">Notify me of follow-up comments via email.</span>
+            </p>
+            <br>
+
+          
+
+          <input type="hidden" id="authKey" name="authKey" value="">
+          <input style="width: 150px;" tabindex="6" class="button" type="button" name="createPostButton" id="createPostButton" value="Create Post" onclick="submitContent(true);"> &nbsp;&nbsp;
+          <input style="width: 150px;" tabindex="7" class="button" type="button" name="previewPostButton" id="previewPostButton" value="Preview Post" onclick="submitContent(false);">
+
+        </div>
+
+      
+
+    </div>
+
+  </form>
+
+  <script type="text/javascript">
+  // <![CDATA[
+
+    function toggleNotify() {
+      document.getElementById("followOptIn").click();
+    }
+              
+    function submitContent(isFinal) {
+      if (isFinal) {
+        document.getElementById("postform").action += "&finalize=true";
+        Squarespace.StorableFields.save("authorName", "authorEmail", "authorUrl");
+      }
+      Squarespace.Form.smartSubmit("postform");
+    }
+
+  // ]]>
+  </script>
+
+  
+
+
+  
+            
+  
+          
+  
+        
+  
+      </div>
+        
+    
+  
+  
+  
+
+  
+
+
+  
+
+  
+
+  
+  
+
+</div></div> <!-- Content -->
+  
+    
+  
+    </div></div> <!-- Page Body -->
+
+    
+    
+    <div id="pageFooterWrapper"><div id="pageFooter">
+  
+              Copyright © 2014, Todd Hoff.  All rights reserved.
+      
+  
+      
+  
+    </div></div>
+  
+  </div></div> <!-- Canvas -->
+  
+   
+
+
+  <div class="clearer" id="bodyClearer"></div>
+
+  
+
+
+
+
+<div id="sslightbox_title" class="squarespace-lightbox-description" style="color: rgb(233, 233, 233); font-style: normal; font-variant: normal; font-weight: normal; font-size: 28px; line-height: normal; font-family: Arial; position: absolute; top: 0px; left: 0px; z-index: 950; display: none; cursor: pointer; opacity: 0;"></div><div id="sslightbox_description" style="color: rgb(233, 233, 233); position: absolute; font-style: normal; font-variant: normal; font-weight: normal; font-size: 14px; line-height: 20px; font-family: Arial; top: 0px; left: 0px; z-index: 950; display: none; cursor: pointer; opacity: 0;"></div><div id="sslightbox_overlay" title="Click to Close" style="background-color: rgb(0, 0, 0); width: 100%; height: 100%; position: absolute; top: 0px; left: 0px; z-index: 900; display: none; cursor: pointer; opacity: 0; background-position: initial initial; background-repeat: initial initial;"></div><a id="sslightbox_previmg" href="javascript:SSLightbox.switchImage(-1);" style="background-color: transparent; background-image: url(http://highscalability.com/universal/images/overlay-arrow-left.png); position: absolute; display: none; width: 35px; height: 50px; left: 8px; z-index: 950; cursor: pointer; opacity: 0;"></a><a id="sslightbox_nextimg" href="javascript:SSLightbox.switchImage(1);" style="background-color: transparent; background-image: url(http://highscalability.com/universal/images/overlay-arrow-right.png); position: absolute; display: none; width: 35px; height: 50px; right: 8px; z-index: 950; cursor: pointer; opacity: 0;"></a><div id="sslightbox_imgholder" style="position: absolute; top: 347.5px; left: 852.5px; background-color: rgb(255, 255, 255); opacity: 0; z-index: 950; width: 200px; height: 200px; display: none;"><span id="sslightbox_imgwrapper" classname="thumbnail-wrapper" style="position: absolute; top: 14px; left: 14px;"><img id="sslightbox_img" style="position: absolute; top: 0px; left: 0px; opacity: 0; display: none; z-index: 995; padding: 0px; margin: 0px; border: 0px; cursor: pointer;"></span></div><img id="sslightbox_loadimg" src="./5 Steps to Benchmarking Managed NoSQL - DynamoDB vs Cassandra - High Scalability -_files/loading.gif" style="position: absolute; opacity: 0; width: 48px; height: 54px; z-index: 990; padding: 0px; margin: 0px; border: 0px; cursor: pointer; left: 928.5px; top: 420.5px; display: none;"><a id="sslightbox_scrollrightimg" href="javascript:SSLightbox.scrollThumbnails(1);" class="picture-gallery-thumbnail-scroll-right" style="position: absolute; display: block; z-index: 800; top: -5000px; left: -10000px;"></a><a id="sslightbox_scrollleftimg" href="javascript:SSLightbox.scrollThumbnails(-1);" class="picture-gallery-thumbnail-scroll-left" style="position: absolute; display: block; z-index: 800; top: -5000px; left: -10000px;"></a><iframe id="google_osd_static_frame_6097532573621" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;"></iframe></body></html>
